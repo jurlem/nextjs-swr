@@ -26,13 +26,6 @@ const App = () => {
     return [...result, input]
   }
 
-  const optionFilterColor = filterOptions => input => {
-    // return filterOptions[input.node.colorFamily?.map(item => (Object.values(item))).join()].checked
-  }
-  const optionFilterCategory = filterOptions => input => {
-    // return filterOptions[input.node.categoryTags.map(item => (Object.values(item))).join()].checked
-  }
-
   const determineColorFilterOptions = (data) => {
     return data
       .map(product => {
@@ -95,10 +88,12 @@ const App = () => {
     return <div>Loading ....</div>
   }
 
-  const filteredProducts = products
-    // ?.filter(optionFilterColor(colorFilterOptions))
-    // ?.filter(optionFilterCategory(categoryFilterOptions))
-    .slice(0, limit)
+  const unfilteredProducts = products.slice(0, limit)
+  const filteredProducts =
+    products
+      .filter(input => colorFilterOptions[input.node.colorFamily?.map(item => (Object.values(item))).join()]?.checked)
+      // .filter(input => categoryFilterOptions[input.node.categoryTags?.join().split(",").map(i => i)]?.checked)
+      .slice(0, limit)
 
   return (
     <Grid py={16} px={4}>
@@ -117,13 +112,16 @@ const App = () => {
                   return (
                     <Checkbox key={key}
                       isChecked={colorFilterOptions[key].checked}
-                      onChange={(e) => setColorFilterOptions({
-                        ...colorFilterOptions,
-                        [key]: {
-                          label: colorFilterOptions[key].label,
-                          checked: !colorFilterOptions[key].checked
-                        }
-                      })}
+                      onChange={(e) => {
+                        setLimit(DEFAULT_LIMIT)
+                        setColorFilterOptions({
+                          ...colorFilterOptions,
+                          [key]: {
+                            label: colorFilterOptions[key].label,
+                            checked: !colorFilterOptions[key].checked
+                          }
+                        })
+                      }}
                     >
                       {colorFilterOptions[key].label}
                     </Checkbox>
@@ -139,13 +137,16 @@ const App = () => {
                   return (
                     <Checkbox key={key}
                       isChecked={categoryFilterOptions[key].checked}
-                      onChange={(e) => setCategoryFilterOptions({
-                        ...categoryFilterOptions,
-                        [key]: {
-                          label: categoryFilterOptions[key].label,
-                          checked: !categoryFilterOptions[key].checked
-                        }
-                      })}
+                      onChange={(e) => {
+                        setLimit(DEFAULT_LIMIT)
+                        setCategoryFilterOptions({
+                          ...categoryFilterOptions,
+                          [key]: {
+                            label: categoryFilterOptions[key].label,
+                            checked: !categoryFilterOptions[key].checked
+                          }
+                        })
+                      }}
                     >
                       {categoryFilterOptions[key].label}
                     </Checkbox>
@@ -177,12 +178,15 @@ const App = () => {
           setLimit(limit + DEFAULT_LIMIT)
         }}
         hasMore={true}
-        loader={<p isLoading >Loading.... </p>}
+        loader={<p >Loading.... </p>}
       >
         <Grid templateColumns="repeat(3, 1fr)" gap={6}>
-          {filteredProducts.map((product, index) => (
+          {filteredProducts.length < 1 ? unfilteredProducts.map((product, index) => (
             <ProductCard key={index} {...product} />
-          ))}
+          )) : filteredProducts.map((product, index) => (
+            <ProductCard key={index} {...product} />
+          ))
+          }
         </Grid>
       </InfiniteScroll>
     </Grid >
